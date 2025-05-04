@@ -85,4 +85,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 		return employeeRepository.save(employee);
 	}
 
+	@Override
+	public List<Employee> findByName(String name) {
+		Optional<List<Employee>> findByName = employeeRepository.findByName(name);
+		List<Employee> employee = findByName
+				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with the given name : " + name));
+		return employee;
+	}
+
 }
