@@ -18,4 +18,6 @@ public interface EmployeeService {
 
 	public Employee partialUpdate(Map<String, Object> key, int id);
 
+	public List<Employee> findByName(String name);
+
 }

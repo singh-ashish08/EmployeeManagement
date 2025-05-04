@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.emp.entity.Employee;
@@ -60,5 +61,11 @@ public class EmployeeController {
 	public ResponseEntity<Employee> partialUpdate(@RequestBody Map<String, Object> key, @PathVariable("id") int id) {
 		Employee partialUpdate = employeeService.partialUpdate(key, id);
 		return new ResponseEntity<>(partialUpdate, HttpStatus.OK);
+	}
+
+	@GetMapping("/find ")
+	public ResponseEntity<List<Employee>> findByName(@RequestParam("name") String name) {
+		List<Employee> findByName = employeeService.findByName(name);
+		return new ResponseEntity<>(findByName, HttpStatus.OK);
 	}
 }
