@@ -1,6 +1,7 @@
 package com.emp.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.emp.entity.Employee;
 
@@ -14,5 +15,7 @@ public interface EmployeeService {
 	public void deleteEmployee(int id);
 
 	public Employee updateEmployee(int id, Employee emp);
+
+	public Employee partialUpdate(Map<String, Object> key, int id);
 
 }
