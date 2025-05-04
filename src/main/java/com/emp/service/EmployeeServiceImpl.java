@@ -1,11 +1,13 @@
 package com.emp.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.emp.entity.Employee;
+import com.emp.exception.EmployeeNotFoundException;
 import com.emp.repository.EmployeeRepository;
 
 @Service
@@ -17,7 +19,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Override
 	public Employee getEmployee(int id) {
 		// TODO Auto-generated method stub
-		return employeeRepository.findById(id).get();
+		Optional<Employee> findById = employeeRepository.findById(id);
+		return findById
+				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with the given id : " + id));
 	}
 
 	@Override
