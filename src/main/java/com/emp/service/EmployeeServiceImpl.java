@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.emp.dto.EmployeeDto;
 import com.emp.entity.Employee;
 import com.emp.exception.EmployeeNotFoundException;
 import com.emp.repository.EmployeeRepository;
@@ -17,80 +19,90 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
+	@Autowired
+	private ModelMapper modelMapper;
+
+	String notFound = "Employee not found with the given id : ";
 
 	@Override
-	public Employee getEmployee(int id) {
-		// TODO Auto-generated method stub
+	public EmployeeDto getEmployee(int id) {
 		Optional<Employee> findById = employeeRepository.findById(id);
-		Employee orElseThrow = findById
-				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with the given id : " + id));
-		return orElseThrow;
+		Employee orElseThrow = findById.orElseThrow(() -> new EmployeeNotFoundException(notFound + id));
+		EmployeeDto employeeDto = modelMapper.map(orElseThrow, EmployeeDto.class);
+		return employeeDto;
 	}
 
 	@Override
-	public List<Employee> getAll() {
-		// TODO Auto-generated method stub
-		return employeeRepository.findAll();
+	public List<EmployeeDto> getAll() {
+		List<Employee> allEmployees = employeeRepository.findAll();
+		if (allEmployees.isEmpty()) {
+			throw new EmployeeNotFoundException("No employees found");
+		}
+		return allEmployees.stream().map(employee -> modelMapper.map(employee, EmployeeDto.class)).toList();
+
 	}
 
 	@Override
-	public Employee createEmployee(Employee employee) {
-		// TODO Auto-generated method stub
-		return employeeRepository.save(employee);
+	public EmployeeDto createEmployee(EmployeeDto employee) {
+		Employee employeeEntity = modelMapper.map(employee, Employee.class);
+		Employee save = employeeRepository.save(employeeEntity);
+		return modelMapper.map(save, EmployeeDto.class);
 	}
 
 	@Override
 	public void deleteEmployee(int id) {
-		// TODO Auto-generated method stub
-		Employee orElseThrow = employeeRepository.findById(id)
-				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with the given id : " + id));
-		employeeRepository.deleteById(id);
-	}
-
-	@Override
-	public Employee updateEmployee(int id, Employee emp) {
-		// TODO Auto-generated method stub
-		Employee oldEmployee = employeeRepository.findById(id)
-				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with the given id : " + id));
-
-		oldEmployee.setName(emp.getName());
-		oldEmployee.setDob(emp.getDob());
-		oldEmployee.setMob(emp.getMob());
-		oldEmployee.setEmpId(emp.getEmpId());
-		oldEmployee.setId(emp.getId());
-		return employeeRepository.save(oldEmployee);
-	}
-
-	@Override
-	public Employee partialUpdate(Map<String, Object> updates, int id) {
 		Employee employee = employeeRepository.findById(id)
-				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with the given id : " + id));
+				.orElseThrow(() -> new EmployeeNotFoundException(notFound + id));
+		employeeRepository.delete(employee);
+	}
 
+	@Override
+	public EmployeeDto updateEmployee(int id, EmployeeDto emp) {
+		Employee employee = employeeRepository.findById(id)
+				.orElseThrow(() -> new EmployeeNotFoundException(notFound + id));
+		employee.setName(emp.getName());
+		employee.setEmpId(emp.getEmpId());
+		employee.setMob(emp.getMob());
+		employee.setDob(emp.getDob());
+		Employee save = employeeRepository.save(employee);
+		return modelMapper.map(save, EmployeeDto.class);
+
+	}
+
+	@Override
+	public EmployeeDto partialUpdate(Map<String, Object> updates, int id) {
+		Employee employee = employeeRepository.findById(id)
+				.orElseThrow(() -> new EmployeeNotFoundException(notFound + id));
 		updates.forEach((key, value) -> {
 			switch (key) {
-			case "name" -> employee.setName((String) value);
-			case "empId" -> employee.setEmpId((String) value);
-			case "mob" -> employee.setMob((String) value);
-			case "dob" -> {
-				if (value instanceof String dobStr) {
-					employee.setDob(LocalDate.parse(dobStr));
-				} else {
-					throw new IllegalArgumentException("Invalid format for dob. Expected ISO string (e.g. 2000-01-01)");
-				}
-			}
-			default -> throw new IllegalArgumentException("Field not supported for update: " + key);
+			case "name":
+				employee.setName((String) value);
+				break;
+			case "empId":
+				employee.setEmpId((String) value);
+				break;
+			case "mob":
+				employee.setMob((String) value);
+				break;
+			case "dob":
+				employee.setDob(LocalDate.parse((String) value));
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid field: " + key);
 			}
 		});
+		Employee save = employeeRepository.save(employee);
+		return modelMapper.map(save, EmployeeDto.class);
 
-		return employeeRepository.save(employee);
 	}
 
 	@Override
-	public List<Employee> findByName(String name) {
+	public List<EmployeeDto> findByName(String name) {
 		Optional<List<Employee>> findByName = employeeRepository.findByName(name);
-		List<Employee> employee = findByName
-				.orElseThrow(() -> new EmployeeNotFoundException("Employee not found with the given name : " + name));
-		return employee;
+		if (findByName.isEmpty()) {
+			throw new EmployeeNotFoundException("No employees found with the name: " + name);
+		}
+		return findByName.stream().map(employee -> modelMapper.map(employee, EmployeeDto.class)).toList();
 	}
 
 }
