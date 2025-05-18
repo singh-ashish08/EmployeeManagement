@@ -3,21 +3,21 @@ package com.emp.service;
 import java.util.List;
 import java.util.Map;
 
-import com.emp.entity.Employee;
+import com.emp.dto.EmployeeDto;
 
 public interface EmployeeService {
-	public Employee getEmployee(int id);
+	public EmployeeDto getEmployee(int id);
 
-	public List<Employee> getAll();
+	public List<EmployeeDto> getAll();
 
-	public Employee createEmployee(Employee employee);
+	public EmployeeDto createEmployee(EmployeeDto employeeDto);
 
 	public void deleteEmployee(int id);
 
-	public Employee updateEmployee(int id, Employee emp);
+	public EmployeeDto updateEmployee(int id, EmployeeDto employeeDto);
 
-	public Employee partialUpdate(Map<String, Object> key, int id);
+	public EmployeeDto partialUpdate(Map<String, Object> key, int id);
 
-	public List<Employee> findByName(String name);
+	public List<EmployeeDto> findByName(String name);
 
 }

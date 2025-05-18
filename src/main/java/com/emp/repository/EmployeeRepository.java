@@ -9,4 +9,6 @@ import com.emp.entity.Employee;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 	public Optional<List<Employee>> findByName(String name);
+	
+	
 }
