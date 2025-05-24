@@ -1,0 +1,41 @@
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + btoa(username + ":" + password),
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    if (response.ok) {
+      document.getElementById('status').textContent = '✅ Login successful!';
+    } else {
+      document.getElementById('status').textContent = '❌ Login failed.';
+    }
+  } catch (error) {
+    document.getElementById('status').textContent = '⚠️ Error connecting to server.';
+  }
+});
+
+async function logout() {
+  try {
+    const response = await fetch('/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      document.getElementById('status').textContent = '✅ Logged out successfully!';
+    } else {
+      document.getElementById('status').textContent = '❌ Logout failed.';
+    }
+  } catch (error) {
+    document.getElementById('status').textContent = '⚠️ Error during logout.';
+  }
+}
