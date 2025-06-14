@@ -22,7 +22,7 @@ public class SecurityConfig {
 				// Configure URL access rules
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/employee/find", "/employee/{id}", "/employee", "/employee/create_e",
-								"/login")
+								"/login","/attributes/get","/attributes/value","/attributes/default")
 						.permitAll()
 						.requestMatchers("/employee/create", "/employee/update/**", "/employee/delete/**",
 								"/employee/pupdate/**")

@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +18,9 @@ import com.emp.exception.EmployeeNotFoundException;
 import com.emp.repository.EmployeeRepository;
 
 @Service
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
-
+private static final Logger logger= LoggerFactory.getLogger(EmployeeServiceImpl.class);
 	@Autowired
 	private EmployeeRepository employeeRepository;
 	@Autowired
@@ -99,10 +103,15 @@ public class EmployeeServiceImpl implements EmployeeService {
 	@Override
 	public List<EmployeeDto> findByName(String name) {
 		Optional<List<Employee>> findByName = employeeRepository.findByName(name);
+        findByName.ifPresent(employees -> logger.info("Data from DB : {}", employees));
 		if (findByName.isEmpty()) {
 			throw new EmployeeNotFoundException("No employees found with the name: " + name);
-		}
-		return findByName.stream().map(employee -> modelMapper.map(employee, EmployeeDto.class)).toList();
-	}
+		}else{
+			List<Employee> employees = findByName.get();
+			List<EmployeeDto> list = employees.stream().map(employee -> modelMapper.map(employee, EmployeeDto.class)).toList();
+			logger.info("Employee ServiceIMPL : {} ",list);
+			return list;
+
+		}}
 
 }
