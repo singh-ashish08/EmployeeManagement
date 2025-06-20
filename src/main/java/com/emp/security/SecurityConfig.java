@@ -29,12 +29,6 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
 				// ⬅️ Allow public access (no login)
 				.requestMatchers("/", "/convert-pdf", "/download/**", "/css/**", "/js/**").permitAll()
-
-				// 🔐 USER or ADMIN required for employee view
-				.requestMatchers("/employee/find", "/employee/{id}", "/employee", "/employee/create_e", "/login",
-						"/actuator/**")
-				.hasAnyRole("USER", "ADMIN")
-
 				// 🔐 ADMIN-only access
 				.requestMatchers("/employee/**", "/employee/create", "/employee/update/**", "/employee/pupdate/**",
 						"/employee/delete/**")
