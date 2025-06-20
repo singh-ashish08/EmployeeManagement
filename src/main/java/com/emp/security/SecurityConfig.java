@@ -26,30 +26,24 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filter(HttpSecurity http) throws Exception {
 
-		http
-				// Disable CSRF for simplicity (enable it in production!)
-				.csrf(csrf -> csrf.disable())
+		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
+				// ⬅️ Allow public access (no login)
+				.requestMatchers("/", "/convert-pdf", "/download/**", "/css/**", "/js/**").permitAll()
 
-				// Configure URL access rules
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/employee/find", "/employee/{id}", "/employee", "/employee/create_e",
-								"/login", "/actuator/**")
-						.hasAnyRole("USER","ADMIN")
+				// 🔐 USER or ADMIN required for employee view
+				.requestMatchers("/employee/find", "/employee/{id}", "/employee", "/employee/create_e", "/login",
+						"/actuator/**")
+				.hasAnyRole("USER", "ADMIN")
 
-						.requestMatchers("/employee/**", "/employee/create", "/employee/update/**",
-								"/employee/pupdate/**", "/employee/delete/**")
-						.hasRole("ADMIN").anyRequest().authenticated())
+				// 🔐 ADMIN-only access
+				.requestMatchers("/employee/**", "/employee/create", "/employee/update/**", "/employee/pupdate/**",
+						"/employee/delete/**")
+				.hasRole("ADMIN")
 
-				// Enable default login form
-				.formLogin(Customizer.withDefaults())
+				.anyRequest().authenticated())
 
-				// Enable logout
-				.logout(logout -> logout.logoutUrl("/logout"))
-
-				// Use stateless session (good for REST APIs)
+				.formLogin(Customizer.withDefaults()).logout(logout -> logout.logoutUrl("/logout"))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-				// Enable HTTP Basic Auth for testing
 				.httpBasic(Customizer.withDefaults());
 
 		return http.build();
