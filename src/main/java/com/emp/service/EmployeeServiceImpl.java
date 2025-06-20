@@ -48,9 +48,16 @@ private static final Logger logger= LoggerFactory.getLogger(EmployeeServiceImpl.
 
 	@Override
 	public EmployeeDto createEmployee(EmployeeDto employee) {
-		Employee employeeEntity = modelMapper.map(employee, Employee.class);
-		Employee save = employeeRepository.save(employeeEntity);
-		return modelMapper.map(save, EmployeeDto.class);
+		Optional<Employee> existingEmployee = employeeRepository.findByMob(employee.getMob());
+		if (existingEmployee.isPresent()) {
+			throw new EmployeeNotFoundException(
+					"Employee already exists with the given mobile number: " + employee.getMob());
+		} else {
+			Employee employeeEntity = modelMapper.map(employee, Employee.class);
+			Employee save = employeeRepository.save(employeeEntity);
+
+			return modelMapper.map(save, EmployeeDto.class);
+		}
 	}
 
 	@Override

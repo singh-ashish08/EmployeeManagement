@@ -22,4 +22,15 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
 
+	@ExceptionHandler(AlreadyPresentException.class)
+	public ResponseEntity<ApiResponse> handleAlreadyPresentException(AlreadyPresentException ex) {
+		ApiResponse response = new ApiResponse();
+		response.setTimestamp(LocalDateTime.now());
+		response.setStatus(HttpStatus.CONFLICT.value());
+		response.setError("Conflict");
+		response.setMessage(ex.getMessage());
+
+		return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+	}
+
 }

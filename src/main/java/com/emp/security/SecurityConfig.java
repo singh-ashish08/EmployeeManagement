@@ -6,6 +6,12 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @EnableWebSecurity
@@ -13,33 +19,40 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
 	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
 	public SecurityFilterChain filter(HttpSecurity http) throws Exception {
 
-		http
-				// Disable CSRF for simplicity (enable it in production!)
-				.csrf(csrf -> csrf.disable())
+		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> auth
+				// ⬅️ Allow public access (no login)
+				.requestMatchers("/", "/convert-pdf", "/download/**", "/css/**", "/js/**").permitAll()
+				// 🔐 ADMIN-only access
+				.requestMatchers("/employee/**", "/employee/create", "/employee/update/**", "/employee/pupdate/**",
+						"/employee/delete/**")
+				.hasRole("ADMIN")
 
-				// Configure URL access rules
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/employee/find", "/employee/{id}", "/employee", "/employee/create_e",
-								"/login","/attributes/get","/attributes/value","/attributes/default")
-						.permitAll()
-						.requestMatchers("/employee/create", "/employee/update/**", "/employee/delete/**",
-								"/employee/pupdate/**")
-						.authenticated().anyRequest().authenticated())
+				.anyRequest().authenticated())
 
-				// Enable default login form
-				.formLogin(Customizer.withDefaults())
-
-				// Enable logout
-				.logout(logout -> logout.logoutUrl("/logout"))
-
-				// Use stateless session (good for REST APIs)
+				.formLogin(Customizer.withDefaults()).logout(logout -> logout.logoutUrl("/logout"))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-				// Enable HTTP Basic Auth for testing
 				.httpBasic(Customizer.withDefaults());
 
 		return http.build();
 	}
+
+	@Bean
+	public UserDetailsService userDetailsService() {
+		UserDetails user1 = User.builder().username("@Ashish08").password(passwordEncoder().encode("!Ashish"))
+				.roles("USER").build();
+		UserDetails user2 = User.builder().username("@Ramesh").password(passwordEncoder().encode("R@m")).roles("USER")
+				.build();
+		UserDetails admin = User.builder().username("@Admin").password(passwordEncoder().encode("!@Admin08"))
+				.roles("ADMIN").build();
+
+		return new InMemoryUserDetailsManager(user1, user2, admin);
+	}
+
 }
