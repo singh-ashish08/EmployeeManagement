@@ -1,4 +1,4 @@
-package com.emp.exception;
+package com.emp.controller;
 
 public class AlreadyPresentException extends RuntimeException {
 
